@@ -12,7 +12,7 @@ let getAllTask = async (req, res, next) => {
         const docs = await service.getAll();
         return res.send(docs);
     } catch (err) {
-        return next('co loi xay ra trong qua trinh get all task', 500);
+        return next(err);
     }
 };
 
@@ -20,12 +20,9 @@ let createTask = async (req, res, next) => {
     try {
         const service = new Service(await Connect.getClient(db_url));
         const result = await service.create(req.body);
-        if(result instanceof APIError) {
-            return next(result.message, result.status_code);
-        }
         return res.send(result);
     } catch (err) {
-        return next('co loi xay ra trong qua trinh create task', 500);
+        return next(err);
     }
 };
 
@@ -34,12 +31,9 @@ let getTaskById = async (req, res, next) => {
         const {id} = req.params;
         const service = new Service(await Connect.getClient(db_url));
         const result = await service.get(Number(id));
-        if(result instanceof APIError) {
-            return next(result.message, result.status_code);
-        }
         return res.send(result);
     } catch (err) {
-        return next('co loi xay ra trong qua trinh get task by id', 500);
+        return next(err);
     }
 };
 
@@ -48,12 +42,9 @@ let deleteTaskById = async (req, res, next) => {
         const {id} = req.params;
         const service = new Service(await Connect.getClient(db_url));
         const result = await service.delete(Number(id));
-        if(result instanceof APIError) {
-            return next(result.message, result.status_code);
-        }
         return res.send(result);
     } catch (err) {
-        return next('co loi xay ra trong qua trinh delete task by id', 500);
+        return next(err);
     }
 };
 
@@ -61,12 +52,9 @@ let updateTask = async (req, res, next) => {
     try {
         const service = new Service(await Connect.getClient(db_url));
         const result = await service.update(req.body);
-        if(result instanceof APIError) {
-            return next(result.message, result.status_code);
-        }
         return res.send(result);
     } catch (err) {
-        return next('co loi xay ra trong qua trinh update task', 500);
+        return next(err);
     }
 };
 

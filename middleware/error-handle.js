@@ -1,8 +1,10 @@
+const { createError, APIError} = require('../error/custom-error.js');
+
 let errorHandle = (err, req, res, next) => {
-    let {status_code, message} = err;
-    if(status_code && message)
-        res.status(status_code).send(message);
-    else next(err);
+    if(err instanceof APIError) 
+        res.status(err.status_code).send(err.message);
+    else
+        res.status(500).send('co loi xay ra phia may chu');
 }
 
 module.exports = {
