@@ -3,11 +3,10 @@ const {show} = require('../debug/debug.js');
 
 class Service {
     constructor(client) {
-        this.collection = client.db().collection(process.env.COLLECTION_TASK);
+        this.collection = client.db().collection(process.env.COLLECTION_TASK);;
     }
 
     async get(id) {
-        show({id});
         const result = await this.collection.findOne({ id });
         return result;
     }
