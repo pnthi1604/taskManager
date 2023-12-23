@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .task-manager {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .error-message {
+            background-color: #f44336;
+            color: #fff;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .task-input {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #taskId,
+        #taskInput,
+        #taskStatus {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        label.complete {
+            padding-top: 8px;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: auto auto auto;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task span {
+            margin-right: 16px;
+        }
+
+
+        .task-buttons {
+            display: flex;
+        }
+
+        .task-buttons button {
+            margin-left: 10px;
+        }
+
+        .task input[type="checkbox"] {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="task-manager">
+        <h1>Task Manager</h1>
+        <div class="error-message" id="errorMessage" style="display:none;"></div>
+        <div class="task-input">
+            <input type="number" id="taskId" placeholder="Task ID">
+            <input type="text" id="taskInput" placeholder="Add a new task">
+            <label for="taskStatus" class="complete">Completed:</label>
+            <input type="checkbox" id="taskStatus">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function isNull(value) {
+            return value == undefined || value.length == 0;
+        };
+
+        async function getTasks() {
+            try {
+                const response = await axios.get('/task');
+                const tasks = response.data;
+                tasks.forEach(renderTask);
+            } catch (error) {
+                showError(error.message);
+                return;
+            }
+        }
+
+        async function postTask(id, title, status) {
+            try {
+                const response = await axios.post('/task', { id, title, status });
+                const newTask = response.data;
+                return newTask;
+            } catch (error) {
+                showError(error.message);
+                return null;
+            }
+        }
+
+        async function deleteTask(id) {
+            try {
+                console.log(`/task/${id}`);
+                await axios.delete(`/task/${id}`);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function addTask() {
+            var taskIdInput = document.getElementById("taskId");
+            var taskInput = document.getElementById("taskInput");
+            var taskStatusInput = document.getElementById("taskStatus");
+            if(isNull(taskIdInput.value) || isNull(taskInput.value)) return;
+
+            if (taskInput.value.trim() !== "") {
+                try {
+                    const newTask = await postTask(taskIdInput.value, taskInput.value, taskStatusInput.checked);
+                    if (newTask) {
+                        renderTask({id: taskIdInput.value, title: taskInput.value, status: taskStatusInput.checked});
+                        taskInput.value = "";
+                        taskIdInput.value = "";
+                        taskStatusInput.checked = false;
+                    }
+                } catch (error) {
+                    console.error('Error adding task:', error.message);
+                }
+            }
+        }
+
+        async function deleteTaskItem(id) {
+            try {
+                await deleteTask(id);
+                removeTaskElement(id);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function renderTask(task) {
+            var taskList = document.getElementById("taskList");
+            var taskElement = document.createElement("li");
+            taskElement.className = "task";
+            taskElement.id = `task-${task.id}`;
+
+            
+            var taskStatus = task.status ? "Done" : "Pending";
+            let checked = task.status ? "checked" : "";
+
+            taskElement.innerHTML = `
+                <span>ID: ${task.id}</span>
+                <span>${task.title}</span>
+                <div class="task-buttons">
+                    <button onclick="deleteTaskItem(${task.id})">Delete</button>
+                </div>
+            `;
+
+            taskList.appendChild(taskElement);
+        }
+
+        function removeTaskElement(id) {
+            var taskList = document.getElementById("taskList");
+            var taskElement = document.getElementById(`task-${id}`);
+            taskList.removeChild(taskElement);
+        }
+
+        function showError(message) {
+            var errorMessage = document.getElementById("errorMessage");
+            errorMessage.innerHTML = message;
+            errorMessage.style.display = "block";
+
+            setTimeout(function () {
+                errorMessage.style.display = "none";
+            }, 3000);
+        }
+
+        window.onload = getTasks;
+    </script>
+</body>
+
+</html>

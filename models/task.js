@@ -25,7 +25,6 @@ class Service {
     async update(data) {
         if((await this.get(data.id))) {
             return await this.collection.updateOne(
-                { id: data.id},
                 { $set: data }
             );
         } else {

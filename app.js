@@ -4,10 +4,12 @@ const bodyParser = require('body-parser');
 const { Connect } = require('./db/connect.js');
 const { errorHandle } = require('./middleware/error-handle.js');
 const task = require('./router/task.router.js');
+const fs = require('fs');
 require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 const db_url = process.env.DATABASE_URL;
+const indexHtmlContent = fs.readFileSync('index.html', 'utf-8');
 
 const app = express();
 
@@ -18,7 +20,7 @@ app.use(bodyParser.urlencoded(
     }));
 
 app.get('/', (req, res) => {
-    res.send('xin chao cac ban');
+    res.send(indexHtmlContent);
 });
 
 app.use('/task', task);
